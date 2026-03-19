@@ -329,7 +329,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
       {/* Dash-flow animation for SVG lines */}
       <style>{`
         @keyframes tlbDashFlow { to { stroke-dashoffset: -20; } }
-        .tlb-svg-flow { stroke-dasharray: 8,4; animation: tlbDashFlow 0.38s linear infinite; }
+        .tlb-svg-flow { stroke-dasharray: 8,4; animation: tlbDashFlow 1.5s linear infinite; }
       `}</style>
 
       {/* ── SVG Arrow Overlay ──────────────────────────────────────
@@ -533,7 +533,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
             top: '38%', left: '41%', width: '230px', minHeight: '220px',
             overflow: 'visible', zIndex: 10,
             opacity: (!isInitialHit && currentStep >= 8) || (isInitialHit && currentStep > 3) ? 0.4 : 1,
-            transition: 'opacity 0.5s ease, all 0.4s var(--ease-snap)',
+            transition: 'opacity 1.5s ease, all 1.2s var(--ease-snap)',
           }}
         >
           <span className="entity-icon">📋</span>
@@ -597,7 +597,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
                 border: `1px solid ${i === frameNum ? 'var(--ram-border)' : 'transparent'}`,
                 fontFamily: 'var(--font-mono)', fontSize: '0.6rem', textAlign: 'center',
                 color: i === frameNum && isRamActive ? 'white' : 'var(--text-muted)',
-                fontWeight: i === frameNum ? '700' : '400', transition: 'all 0.4s ease',
+                fontWeight: i === frameNum ? '700' : '400', transition: 'all 1.2s ease',
               }}>
                 F{i}
               </div>

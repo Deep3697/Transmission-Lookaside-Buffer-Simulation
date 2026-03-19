@@ -238,7 +238,7 @@ header h1 {
   border-radius: 16px;
   background: white;
   border: 2px solid var(--border-soft);
-  transition: all 0.4s var(--ease-snap);
+  transition: all 1.2s var(--ease-snap);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   z-index: 5;
 }
@@ -375,7 +375,7 @@ header h1 {
   position: absolute;
   height: 2px;
   z-index: 1;
-  animation: lineGrow 0.5s var(--ease-snap) forwards;
+  animation: lineGrow 1.5s var(--ease-snap) forwards;
 }
 .connect-line.amber  { background: linear-gradient(90deg, var(--cpu-main), rgba(245,158,11,0.3)); box-shadow: 0 0 8px var(--cpu-glow); }
 .connect-line.violet { background: linear-gradient(90deg, var(--tlb-main), rgba(139,92,246,0.3)); box-shadow: 0 0 8px var(--tlb-glow); }
@@ -400,7 +400,7 @@ header h1 {
   max-width: 480px;
   opacity: 0;
   transform: translateY(10px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition: opacity 1.2s ease, transform 1.2s ease;
 }
 
 .floating-popup::before {
@@ -740,7 +740,7 @@ header h1 {
   padding: 4px 12px;
   border-radius: 999px;
   text-transform: uppercase;
-  animation: badgePop 0.4s var(--ease-bounce);
+  animation: badgePop 1s var(--ease-bounce);
 }
 
 .status-badge.hit {
@@ -766,7 +766,7 @@ header h1 {
   color: white;
   opacity: 0;
   transform: scale(0.5);
-  transition: all 0.4s var(--ease-bounce);
+  transition: all 1s var(--ease-bounce);
   position: absolute;
   top: -20px;
   left: 50%;
@@ -820,6 +820,66 @@ header h1 {
   background: rgba(139, 92, 246, 0.1);
   color: var(--tlb-main);
   font-weight: 700;
+  --eat-color: rgba(139, 92, 246, 1);
+  animation: rainbow-glow 3s linear infinite;
+}
+
+/* ── RESPONSIVENESS (Mobile & Tablet) ───────────────────────
+   Safely scales the entire stage for smaller screens without
+   breaking the complex mathematically positioned desktop layout!
+──────────────────────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .stage {
+    zoom: 0.85; /* Scale down cleanly */
+  }
+}
+
+@media (max-width: 1024px) {
+  .stage {
+    zoom: 0.7;
+  }
+  .selection-content {
+    width: 40vw;
+  }
+}
+
+@media (max-width: 768px) {
+  .stage {
+    zoom: 0.55;
+  }
+  .selection-content {
+    width: 60vw;
+    right: 50%;
+    transform: translateX(50%) translateY(40px) !important;
+  }
+  /* Ensure the prompt words fit */
+  .prompt-overlay h1, .prompt-title {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .stage {
+    zoom: 0.4;
+    min-height: 150vh; /* Allow scroll for scaled content */
+  }
+  .selection-content {
+    width: 85vw;
+  }
+  .prompt-overlay h1, .prompt-title {
+    font-size: 1.8rem;
+  }
+  /* Stack input boxes beautifully on mobile */
+  .user-input-group {
+    transform: scale(1.5); /* Make inputs readable for small screens */
+    transform-origin: top left;
+  }
+}
+
+@keyframes rainbow-glow {
+  0%   { box-shadow: 0 0 0 0px var(--eat-color); }
+  50%  { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0px var(--eat-color); }
 }
 
 /* ── THEORY CARD ─────────────────────────────────────────── */

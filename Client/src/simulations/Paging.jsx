@@ -367,7 +367,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
       {/* ══ Keyframes ══ */}
       <style>{`
         @keyframes svgDashFlow { to { stroke-dashoffset: -20; } }
-        .svg-line-flow { stroke-dasharray: 8,4; animation: svgDashFlow 0.38s linear infinite; }
+        .svg-line-flow { stroke-dasharray: 8,4; animation: svgDashFlow 1.5s linear infinite; }
 
         @keyframes chipAppear {
           0%   { transform: scale(0.3) translateY(14px); opacity: 0; filter: blur(8px); }
@@ -577,7 +577,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
               position: 'relative', width: '100%',
               maxHeight: '310px', overflowY: 'auto', overflowX: 'hidden',
               opacity: (typeof displayStep === 'number' && displayStep >= 8) ? 0.45 : 1,
-              transition: 'opacity 0.5s ease',
+              transition: 'opacity 1.5s ease',
             }}
           >
 
@@ -629,7 +629,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
             top: '60%', left: '44%', width: '230px', minHeight: '140px',
             zIndex: 10, overflow: 'visible',
             opacity: (typeof displayStep === 'number' && displayStep >= 8) ? 0.45 : 1,
-            transition: 'opacity 0.5s ease',
+            transition: 'opacity 1.5s ease',
           }}
         >
           <span className="entity-icon" style={{ filter: 'hue-rotate(320deg)' }}>💾</span>
@@ -680,7 +680,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
                   padding: '5px 2px', borderRadius: '5px', background: bg,
                   border: `1px solid ${isTgt ? (isRFlsh ? 'var(--tlb-main)' : 'var(--ram-border)') : 'transparent'}`,
                   fontFamily: 'var(--font-mono)', fontSize: '0.58rem', textAlign: 'center', color: clr,
-                  fontWeight: isTgt ? '700' : '400', transition: 'all 0.5s ease', position: 'relative',
+                  fontWeight: isTgt ? '700' : '400', transition: 'all 1.5s ease', position: 'relative',
                   boxShadow: isTgt && typeof displayStep === 'number' && displayStep >= 8 ? '0 0 10px var(--ram-glow)' : isRFlsh ? '0 0 10px var(--tlb-glow)' : 'none',
                 }}>
                   F{i}

@@ -404,7 +404,7 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
       {/* ══ Keyframes ══ */}
       <style>{`
         @keyframes cacheDash { to { stroke-dashoffset: -20; } }
-        .cache-dash { stroke-dasharray:8,4; animation:cacheDash 0.38s linear infinite; }
+        .cache-dash { stroke-dasharray:8,4; animation:cacheDash 1.5s linear infinite; }
 
         /* New block enters: slides down from above into slot */
         @keyframes cacheEnter {
@@ -738,7 +738,7 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
             border: `2px solid ${stepEntry.hit ? '#10b981' : '#ef4444'}`,
             boxShadow: `0 0 28px ${stepEntry.hit ? '#10b98140' : '#ef444440'}`,
           } : {}),
-          transition: 'border-color 0.4s ease, box-shadow 0.4s ease',
+          transition: 'border-color 1.2s ease, box-shadow 1.2s ease',
         }}>
         <span className="entity-icon" style={{ fontSize: '1.3rem' }}>⚡</span>
         <span className="entity-label" style={{
@@ -778,7 +778,7 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
                 : isFifoHit
                   ? `cacheFifoHit 0.55s ease 0s both`
                   : slot
-                    ? `cacheShift 0.3s ease ${i * 0.045}s both`
+                    ? `cacheShift 1s ease ${i * 0.15}s both`
                     : 'none';
 
             /* active border/bg for hit/miss block */
@@ -922,7 +922,7 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
                 border: `1px solid ${isFetching ? '#8b5cf6' : inCache ? '#10b981' : col.border}`,
                 fontFamily: 'var(--font-mono)',
                 color: isFetching ? '#8b5cf6' : inCache ? '#10b981' : col.text,
-                fontWeight: (isFetching || inCache) ? '700' : '400', transition: 'all 0.4s ease',
+                fontWeight: (isFetching || inCache) ? '700' : '400', transition: 'all 1.2s ease',
               }}>
                 <div style={{ fontSize: '0.63rem', fontWeight: '700', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   Block {b}
