@@ -15,11 +15,18 @@ const SIM_META = {
 };
 
 function App() {
-  const [activeSimulation, setActiveSimulation]   = useState('TLB');
+  const [activeSimulation, setActiveSimulation]   = useState(() => {
+    const saved = sessionStorage.getItem('activeSimulation');
+    return saved && SIM_META[saved] ? saved : 'TLB';
+  });
   const [isSimulationActive, setIsSimulationActive] = useState(false);
   const [currentStep, setCurrentStep]             = useState(0);
   const [maxSteps, setMaxSteps]                   = useState(0);
   const [isMenuOpen, setIsMenuOpen]               = useState(false);
+  
+  React.useEffect(() => {
+    sessionStorage.setItem('activeSimulation', activeSimulation);
+  }, [activeSimulation]);
 
   useKeyboard({
     isSimulationActive,
@@ -36,13 +43,17 @@ function App() {
     setIsMenuOpen(false);
   };
 
+  const handleRestart = () => {
+    setCurrentStep(2); // Jump directly to the input step
+  };
+
   const renderSimulation = () => {
     const props = { currentStep, setMaxSteps };
     switch (activeSimulation) {
-      case 'TLB':    return <TLB    {...props} />;
-      case 'Paging': return <Paging {...props} />;
-      case 'Cache':  return <Cache  {...props} />;
-      default:       return <TLB    {...props} />;
+      case 'TLB':    return <TLB    {...props} onRestart={handleRestart} />;
+      case 'Paging': return <Paging {...props} onRestart={handleRestart} />;
+      case 'Cache':  return <Cache  {...props} onRestart={handleRestart} />;
+      default:       return <TLB    {...props} onRestart={handleRestart} />;
     }
   };
 
@@ -122,7 +133,7 @@ function App() {
       </header>
 
       {/* ── Stage ─────────────────────────────────────────────── */}
-      <Stage>
+      <Stage currentStep={currentStep}>
         {/* Progress bar at top of stage */}
         {isSimulationActive && (
           <div className="progress-bar-wrap">

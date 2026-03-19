@@ -63,7 +63,6 @@ export default function SideMenu({
               className="sim-selection-card"
               onClick={() => {
                 setActiveSimulation(sim.id);
-                toggleMenu(); // Close after selection
               }}
             >
               <div className="sim-image-box">

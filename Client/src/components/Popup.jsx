@@ -44,29 +44,30 @@ export default function Popup({
 
       switch (position) {
         case 'bottom':
-          top = target.bottom + GAP;
-          left = target.left + target.width / 2 - popup.width / 2;
+          top = target.bottom + window.scrollY + GAP;
+          left = target.left + window.scrollX + target.width / 2 - popup.width / 2;
           break;
         case 'top':
-          top = target.top - popup.height - GAP;
-          left = target.left + target.width / 2 - popup.width / 2;
+          top = target.top + window.scrollY - popup.height - GAP;
+          left = target.left + window.scrollX + target.width / 2 - popup.width / 2;
           break;
         case 'right':
-          top = target.top + target.height / 2 - popup.height / 2;
-          left = target.right + GAP;
+          top = target.top + window.scrollY + target.height / 2 - popup.height / 2;
+          left = target.right + window.scrollX + GAP;
           break;
         case 'left':
-          top = target.top + target.height / 2 - popup.height / 2;
-          left = target.left - popup.width - GAP;
+          top = target.top + window.scrollY + target.height / 2 - popup.height / 2;
+          left = target.left + window.scrollX - popup.width - GAP;
           break;
         default:
-          top = target.bottom + GAP;
-          left = target.left;
+          top = target.bottom + window.scrollY + GAP;
+          left = target.left + window.scrollX;
       }
 
-      /* Clamp so popup never goes off-screen */
+      /* Clamp horizontally so popup never goes off-screen */
       left = Math.max(12, Math.min(left, VP_W - popup.width - 12));
-      top = Math.max(12, Math.min(top, VP_H - popup.height - 12));
+      /* For vertical, we don't clamp tightly to VP_H because it's absolute within the scrolling document */
+      // top = Math.max(12, Math.min(top, document.documentElement.scrollHeight - popup.height - 12));
 
       setStyle({ top, left });
     } else {
@@ -123,6 +124,7 @@ function themeToColor(theme) {
     tlb: 'var(--tlb-color)',
     pt: 'var(--pt-color)',
     ram: 'var(--ram-color)',
+    miss: 'var(--miss-color)',
   };
   return map[theme] ?? 'var(--tlb-color)';
 }
