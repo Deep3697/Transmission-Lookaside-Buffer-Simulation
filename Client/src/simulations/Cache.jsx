@@ -85,14 +85,14 @@ const C_NS = 10;
 const M_NS = 100;
 
 const COLOR_PALETTE = [
-  { bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.5)', text: '#f59e0b' },
-  { bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.5)', text: '#8b5cf6' },
-  { bg: 'rgba(14,165,233,0.12)', border: 'rgba(14,165,233,0.5)', text: '#0ea5e9' },
-  { bg: 'rgba(16,185,129,0.12)', border: 'rgba(16,185,129,0.5)', text: '#10b981' },
-  { bg: 'rgba(236,72,153,0.12)', border: 'rgba(236,72,153,0.5)', text: '#ec4899' },
-  { bg: 'rgba(234,179,8,0.12)', border: 'rgba(234,179,8,0.5)', text: '#eab308' },
-  { bg: 'rgba(6,182,212,0.12)', border: 'rgba(6,182,212,0.5)', text: '#06b6d4' },
-  { bg: 'rgba(249,115,22,0.12)', border: 'rgba(249,115,22,0.5)', text: '#f97316' },
+  { bg: 'hsla(38,95%,50%,0.12)',  border: 'hsla(38,95%,50%,0.5)',  text: 'hsl(38,95%,50%)' },
+  { bg: 'hsla(325,85%,55%,0.12)', border: 'hsla(325,85%,55%,0.5)', text: 'hsl(325,85%,55%)' },
+  { bg: 'hsla(250,80%,52%,0.12)', border: 'hsla(250,80%,52%,0.5)', text: 'hsl(250,80%,52%)' },
+  { bg: 'hsla(145,75%,42%,0.12)', border: 'hsla(145,75%,42%,0.5)', text: 'hsl(145,75%,42%)' },
+  { bg: 'hsla(340,80%,55%,0.12)', border: 'hsla(340,80%,55%,0.5)', text: 'hsl(340,80%,55%)' },
+  { bg: 'hsla(45,90%,48%,0.12)',  border: 'hsla(45,90%,48%,0.5)',  text: 'hsl(45,90%,48%)' },
+  { bg: 'hsla(280,75%,55%,0.12)', border: 'hsla(280,75%,55%,0.5)', text: 'hsl(280,75%,55%)' },
+  { bg: 'hsla(15,90%,55%,0.12)',  border: 'hsla(15,90%,55%,0.5)',  text: 'hsl(15,90%,55%)' },
 ];
 
 function blockColor(block) {
@@ -312,7 +312,14 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
   /* ── SVG path helper ── */
   const makePath = (x1, y1, x2, y2) => {
     const mx = (x1 + x2) / 2;
-    return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+    // Shorten endpoint so arrowhead doesn't overlap target box
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const shrink = len > 0 ? 8 / len : 0;
+    const ex = x2 - dx * shrink;
+    const ey = y2 - dy * shrink;
+    return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${ey}, ${ex} ${ey}`;
   };
 
   /* ── Compute SVG arrows ── */
@@ -338,13 +345,13 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
       const isMiss = stepEntry?.hit === false;
 
       if (cpu && cache)
-        lines.push({ key: 'cpu-cache', path: makePath(cpu.right + 4, cpu.cy, cache.left - 4, cache.cy), color: '#F59E0B', animated: true });
+        lines.push({ key: 'cpu-cache', path: makePath(cpu.right + 4, cpu.cy, cache.left - 4, cache.cy), color: 'hsl(38,95%,50%)', animated: true });
       if (cache && ram && isMiss)
-        lines.push({ key: 'cache-ram', path: makePath(cache.right + 4, cache.cy - 18, ram.left - 4, ram.cy - 18), color: '#EF4444', animated: true });
+        lines.push({ key: 'cache-ram', path: makePath(cache.right + 4, cache.cy - 18, ram.left - 4, ram.cy - 18), color: 'hsl(355,85%,52%)', animated: true });
       if (cache && ram && isMiss)
-        lines.push({ key: 'ram-cache', path: makePath(ram.left - 4, ram.cy + 18, cache.right + 4, cache.cy + 18), color: '#8B5CF6', animated: true });
+        lines.push({ key: 'ram-cache', path: makePath(ram.left - 4, ram.cy + 18, cache.right + 4, cache.cy + 18), color: 'hsl(325,85%,55%)', animated: true });
       if (cpu && cache && isHit)
-        lines.push({ key: 'cache-cpu', path: makePath(cache.left - 4, cache.cy + 18, cpu.right + 4, cpu.cy + 18), color: '#10B981', animated: true });
+        lines.push({ key: 'cache-cpu', path: makePath(cache.left - 4, cache.cy + 18, cpu.right + 4, cpu.cy + 18), color: 'hsl(145,75%,42%)', animated: true });
 
       setSvgLines(lines);
     };
@@ -482,7 +489,7 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
 
         .cache-scifi-box::after {
           content:''; position:absolute; left:0; right:0; height:2px; top:-4px;
-          background:linear-gradient(90deg,transparent,rgba(139,92,246,0.7),transparent);
+          background:linear-gradient(90deg,transparent,hsla(325,85%,55%,0.7),transparent);
           animation:cacheScanline 2.4s linear 0.5s infinite; pointer-events:none;
         }
       `}</style>
@@ -492,11 +499,11 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
         <defs>
           {svgLines.map(l => (
             <React.Fragment key={l.key}>
-              <marker id={`ca-${l.key}`} markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
-                <polygon points="0 0,10 4,0 8" fill={l.color} />
+              <marker id={`ca-${l.key}`} viewBox="0 0 12 10" markerWidth="12" markerHeight="10" refX="10" refY="5" orient="auto" markerUnits="userSpaceOnUse" overflow="visible">
+                <polygon points="0 0,12 5,0 10" fill={l.color} />
               </marker>
-              <filter id={`cg-${l.key}`} x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2" result="b" />
+              <filter id={`cg-${l.key}`} x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3" result="b" />
                 <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
               </filter>
             </React.Fragment>
@@ -504,6 +511,7 @@ export default function Cache({ currentStep, setMaxSteps, onRestart }) {
         </defs>
         {svgLines.map(l => (
           <path key={l.key} d={l.path} fill="none" stroke={l.color} strokeWidth="2.5"
+            strokeLinecap="round"
             className={l.animated ? 'cache-dash' : ''}
             markerEnd={`url(#ca-${l.key})`} filter={`url(#cg-${l.key})`} />
         ))}

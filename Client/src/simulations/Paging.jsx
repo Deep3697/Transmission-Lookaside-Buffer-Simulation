@@ -258,12 +258,19 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
   const makeCurvedPath = (x1, y1, x2, y2) => {
     const dx = Math.abs(x2 - x1);
     const dy = Math.abs(y2 - y1);
+    // Shorten endpoint so arrowhead doesn't overlap target box
+    const ddx = x2 - x1;
+    const ddy = y2 - y1;
+    const len = Math.sqrt(ddx*ddx + ddy*ddy);
+    const shrink = len > 0 ? 8 / len : 0;
+    const ex = x2 - ddx * shrink;
+    const ey = y2 - ddy * shrink;
     if (dy > dx) {
-      const my = (y1 + y2) / 2;
-      return `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`;
+      const my = (y1 + ey) / 2;
+      return `M ${x1} ${y1} C ${x1} ${my}, ${ex} ${my}, ${ex} ${ey}`;
     }
-    const mx = (x1 + x2) / 2;
-    return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+    const mx = (x1 + ex) / 2;
+    return `M ${x1} ${y1} C ${mx} ${y1}, ${mx} ${ey}, ${ex} ${ey}`;
   };
 
   /* ── Compute SVG lines from real bounding boxes ── */
@@ -297,7 +304,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
           key: 'cpu-pt',
           x1: cpu.cx, y1: cpu.bottom,
           x2: pt.cx,  y2: pt.top,
-          color: '#38BDF8', animated: true,
+          color: 'hsl(250, 80%, 52%)', animated: true,
         });
       }
       /* Page Table → Hard Drive (fault step 5a) */
@@ -306,7 +313,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
           key: 'pt-hd',
           x1: pt.right, y1: pt.cy,
           x2: hd.left,  y2: hd.cy,
-          color: '#EF4444', animated: true,
+          color: 'hsl(355, 85%, 52%)', animated: true,
         });
       }
       /* Hard Drive → RAM (fault step 5b) */
@@ -315,7 +322,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
           key: 'hd-ram',
           x1: hd.right, y1: hd.cy,
           x2: ram.left, y2: ram.cy,
-          color: '#8B5CF6', animated: true,
+          color: 'hsl(325, 85%, 55%)', animated: true,
         });
       }
       /* Page Table → RAM (steps 6-7) */
@@ -324,7 +331,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
           key: 'pt-ram',
           x1: pt.right, y1: pt.cy,
           x2: ram.left, y2: ram.cy,
-          color: '#10B981', animated: false,
+          color: 'hsl(145, 75%, 42%)', animated: false,
         });
       }
       /* CPU → RAM direct (steps 8+) */
@@ -333,7 +340,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
           key: 'cpu-ram',
           x1: cpu.right, y1: cpu.cy,
           x2: ram.left,  y2: ram.cy,
-          color: '#F59E0B', animated: false,
+          color: 'hsl(38, 95%, 50%)', animated: false,
         });
       }
 
@@ -413,11 +420,11 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
 
         .pt-scroller::-webkit-scrollbar        { width: 5px; }
         .pt-scroller::-webkit-scrollbar-track  { background: transparent; }
-        .pt-scroller::-webkit-scrollbar-thumb  { background: rgba(139,92,246,0.3); border-radius: 10px; }
-        .pt-scroller::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.55); }
-        .pt-scroller { scrollbar-width: thin; scrollbar-color: rgba(139,92,246,0.3) transparent; }
+        .pt-scroller::-webkit-scrollbar-thumb  { background: hsla(325,85%,55%,0.3); border-radius: 10px; }
+        .pt-scroller::-webkit-scrollbar-thumb:hover { background: hsla(325,85%,55%,0.55); }
+        .pt-scroller { scrollbar-width: thin; scrollbar-color: hsla(325,85%,55%,0.3) transparent; }
 
-        .scifi-box::after { content: ''; position: absolute; left: 0; right: 0; height: 2px; top: -4px; background: linear-gradient(90deg,transparent,rgba(16,185,129,0.7),transparent); animation: scanline 2.4s linear 0.5s infinite; pointer-events: none; }
+        .scifi-box::after { content: ''; position: absolute; left: 0; right: 0; height: 2px; top: -4px; background: linear-gradient(90deg,transparent,hsla(145,75%,42%,0.7),transparent); animation: scanline 2.4s linear 0.5s infinite; pointer-events: none; }
       `}</style>
 
       {/* ══ SVG overlay — FIX: overflow:visible, correct marker positioning ══ */}
@@ -427,15 +434,17 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
             <React.Fragment key={l.key}>
               <marker
                 id={`arr-${l.key}`}
-                markerWidth="10" markerHeight="8"
-                refX="9" refY="4"
+                viewBox="0 0 12 10"
+                markerWidth="12" markerHeight="10"
+                refX="10" refY="5"
                 orient="auto"
-                markerUnits="strokeWidth"
+                markerUnits="userSpaceOnUse"
+                overflow="visible"
               >
-                <polygon points="0 0, 10 4, 0 8" fill={l.color} />
+                <polygon points="0 0, 12 5, 0 10" fill={l.color} />
               </marker>
-              <filter id={`glow-${l.key}`} x="-50%" y="-50%" width="200%" height="200%">
-                <feGaussianBlur stdDeviation="2" result="b" />
+              <filter id={`glow-${l.key}`} x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3" result="b" />
                 <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
             </React.Fragment>
@@ -448,6 +457,7 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
             fill="none"
             stroke={l.color}
             strokeWidth="2.5"
+            strokeLinecap="round"
             className={l.animated ? 'svg-line-flow' : ''}
             markerEnd={`url(#arr-${l.key})`}
             filter={`url(#glow-${l.key})`}
@@ -710,21 +720,21 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
         <>
           {/* f — near Page Table */}
           <div style={{ position: 'absolute', left: '28%', top: '62%', zIndex: 20, animation: 'chipAppear 0.55s cubic-bezier(0.34,1.56,0.64,1) 0s both' }}>
-            <div style={{ padding: '10px 16px', borderRadius: '14px', background: 'rgba(16,185,129,0.12)', border: '2px solid #10B981', boxShadow: '0 0 18px #10B98155', fontFamily: 'var(--font-mono)', textAlign: 'center', animation: 'varChipFloat 2.2s ease-in-out 0.6s infinite' }}>
-              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#10B981' }}>f = {frameNum}</div>
+            <div style={{ padding: '10px 16px', borderRadius: '14px', background: 'hsla(145,75%,42%,0.12)', border: '2px solid hsl(145,75%,42%)', boxShadow: '0 0 18px hsla(145,75%,42%,0.33)', fontFamily: 'var(--font-mono)', textAlign: 'center', animation: 'varChipFloat 2.2s ease-in-out 0.6s infinite' }}>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: 'hsl(145,75%,42%)' }}>f = {frameNum}</div>
               <div style={{ fontSize: '0.56rem', color: 'var(--text-muted)', marginTop: '3px' }}>Frame # from Page Table</div>
-              <div style={{ fontSize: '0.52rem', color: 'rgba(16,185,129,0.6)', marginTop: '1px' }}>physical RAM slot</div>
+              <div style={{ fontSize: '0.52rem', color: 'hsla(145,75%,42%,0.6)', marginTop: '1px' }}>physical RAM slot</div>
             </div>
-            <div style={{ width: '2px', height: '12px', background: 'linear-gradient(#10B981,transparent)', margin: '0 auto' }} />
+            <div style={{ width: '2px', height: '12px', background: 'linear-gradient(hsl(145,75%,42%),transparent)', margin: '0 auto' }} />
           </div>
           {/* PageSize — near CPU upper */}
           <div style={{ position: 'absolute', left: '22%', top: '7%', zIndex: 20, animation: 'chipAppear 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.15s both' }}>
-            <div style={{ padding: '10px 16px', borderRadius: '14px', background: 'rgba(56,189,248,0.12)', border: '2px solid #38BDF8', boxShadow: '0 0 18px #38BDF855', fontFamily: 'var(--font-mono)', textAlign: 'center', animation: 'varChipFloat 2.2s ease-in-out 0.75s infinite' }}>
-              <div style={{ fontSize: '1rem', fontWeight: '800', color: '#38BDF8' }}>PS = {pageSize}</div>
+            <div style={{ padding: '10px 16px', borderRadius: '14px', background: 'hsla(250,80%,52%,0.12)', border: '2px solid hsl(250,80%,52%)', boxShadow: '0 0 18px hsla(250,80%,52%,0.33)', fontFamily: 'var(--font-mono)', textAlign: 'center', animation: 'varChipFloat 2.2s ease-in-out 0.75s infinite' }}>
+              <div style={{ fontSize: '1rem', fontWeight: '800', color: 'hsl(250,80%,52%)' }}>PS = {pageSize}</div>
               <div style={{ fontSize: '0.56rem', color: 'var(--text-muted)', marginTop: '3px' }}>Page Size (your input)</div>
-              <div style={{ fontSize: '0.52rem', color: 'rgba(56,189,248,0.6)', marginTop: '1px' }}>bytes per page/frame</div>
+              <div style={{ fontSize: '0.52rem', color: 'hsla(250,80%,52%,0.6)', marginTop: '1px' }}>bytes per page/frame</div>
             </div>
-            <div style={{ width: '2px', height: '12px', background: 'linear-gradient(#38BDF8,transparent)', margin: '0 auto' }} />
+            <div style={{ width: '2px', height: '12px', background: 'linear-gradient(hsl(250,80%,52%),transparent)', margin: '0 auto' }} />
           </div>
           {/* d — near CPU lower */}
           <div style={{ position: 'absolute', left: '22%', top: '24%', zIndex: 20, animation: 'chipAppear 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.3s both' }}>
@@ -743,10 +753,10 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
       ══════════════════════════════════════════════════════ */}
       {showMerge && (
         <>
-          <div style={{ position: 'absolute', left: '28%', top: '62%', zIndex: 25, padding: '10px 16px', borderRadius: '14px', background: 'rgba(16,185,129,0.15)', border: '2px solid #10B981', boxShadow: '0 0 22px #10B98177', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: '800', color: '#10B981', animation: 'chipMergeF 1s cubic-bezier(0.55,0,1,0.45) 0s forwards' }}>f = {frameNum}</div>
-          <div style={{ position: 'absolute', left: '22%', top: '7%', zIndex: 25, padding: '10px 16px', borderRadius: '14px', background: 'rgba(56,189,248,0.15)', border: '2px solid #38BDF8', boxShadow: '0 0 22px #38BDF877', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: '800', color: '#38BDF8', animation: 'chipMergePS 1s cubic-bezier(0.55,0,1,0.45) 0.1s forwards' }}>PS = {pageSize}</div>
-          <div style={{ position: 'absolute', left: '22%', top: '24%', zIndex: 25, padding: '10px 16px', borderRadius: '14px', background: 'rgba(245,158,11,0.15)', border: '2px solid #F59E0B', boxShadow: '0 0 22px #F59E0B77', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: '800', color: '#F59E0B', animation: 'chipMergeD 1s cubic-bezier(0.55,0,1,0.45) 0.2s forwards' }}>d = {offset}</div>
-          <div style={{ position: 'absolute', left: '50%', top: '44%', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(16,185,129,0.5) 0%,rgba(139,92,246,0.3) 45%,transparent 70%)', animation: 'mergeFlash 0.7s ease 0.85s forwards', zIndex: 24, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', left: '28%', top: '62%', zIndex: 25, padding: '10px 16px', borderRadius: '14px', background: 'hsla(145,75%,42%,0.15)', border: '2px solid hsl(145,75%,42%)', boxShadow: '0 0 22px hsla(145,75%,42%,0.47)', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: '800', color: 'hsl(145,75%,42%)', animation: 'chipMergeF 1s cubic-bezier(0.55,0,1,0.45) 0s forwards' }}>f = {frameNum}</div>
+          <div style={{ position: 'absolute', left: '22%', top: '7%', zIndex: 25, padding: '10px 16px', borderRadius: '14px', background: 'hsla(250,80%,52%,0.15)', border: '2px solid hsl(250,80%,52%)', boxShadow: '0 0 22px hsla(250,80%,52%,0.47)', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: '800', color: 'hsl(250,80%,52%)', animation: 'chipMergePS 1s cubic-bezier(0.55,0,1,0.45) 0.1s forwards' }}>PS = {pageSize}</div>
+          <div style={{ position: 'absolute', left: '22%', top: '24%', zIndex: 25, padding: '10px 16px', borderRadius: '14px', background: 'hsla(38,95%,50%,0.15)', border: '2px solid hsl(38,95%,50%)', boxShadow: '0 0 22px hsla(38,95%,50%,0.47)', fontFamily: 'var(--font-mono)', fontSize: '1rem', fontWeight: '800', color: 'hsl(38,95%,50%)', animation: 'chipMergeD 1s cubic-bezier(0.55,0,1,0.45) 0.2s forwards' }}>d = {offset}</div>
+          <div style={{ position: 'absolute', left: '50%', top: '44%', width: '100px', height: '100px', borderRadius: '50%', background: 'radial-gradient(circle,hsla(145,75%,42%,0.5) 0%,hsla(325,85%,55%,0.3) 45%,transparent 70%)', animation: 'mergeFlash 0.7s ease 0.85s forwards', zIndex: 24, pointerEvents: 'none' }} />
         </>
       )}
 
@@ -772,9 +782,9 @@ export default function Paging({ currentStep, setMaxSteps, onRestart }) {
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px', margin: '14px 0', width: '100%' }}>
             {[
-              { sym: 'f',        val: frameNum, color: '#10B981', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.3)', desc: 'Frame # from Page Table', sub: 'physical RAM slot' },
-              { sym: 'PageSize', val: pageSize,  color: '#38BDF8', bg: 'rgba(56,189,248,0.1)', border: 'rgba(56,189,248,0.3)', desc: 'Size of each page',       sub: 'bytes per frame'  },
-              { sym: 'd',        val: offset,    color: '#F59E0B', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.3)', desc: 'Offset within page',      sub: 'byte position'    },
+              { sym: 'f',        val: frameNum, color: 'hsl(145,75%,42%)', bg: 'hsla(145,75%,42%,0.1)', border: 'hsla(145,75%,42%,0.3)', desc: 'Frame # from Page Table', sub: 'physical RAM slot' },
+              { sym: 'PageSize', val: pageSize,  color: 'hsl(250,80%,52%)', bg: 'hsla(250,80%,52%,0.1)', border: 'hsla(250,80%,52%,0.3)', desc: 'Size of each page',       sub: 'bytes per frame'  },
+              { sym: 'd',        val: offset,    color: 'hsl(38,95%,50%)',  bg: 'hsla(38,95%,50%,0.1)',  border: 'hsla(38,95%,50%,0.3)',  desc: 'Offset within page',      sub: 'byte position'    },
             ].map((v, idx) => (
               <div key={v.sym} style={{ padding: '9px 6px', borderRadius: '10px', background: v.bg, border: `1.5px solid ${v.border}`, textAlign: 'center', fontFamily: 'var(--font-mono)', animation: `chipAppear 0.45s cubic-bezier(0.34,1.56,0.64,1) ${idx * 0.1}s both` }}>
                 <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', letterSpacing: '0.5px', marginBottom: '2px' }}>{v.sym}</div>

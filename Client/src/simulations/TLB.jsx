@@ -254,13 +254,23 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
   const makeHorizArc = (x1, y1, x2, y2) => {
     const mx  = (x1 + x2) / 2;
     const sag = Math.abs(y2 - y1) < 5 ? 0 : (y2 - y1) * 0.3;
-    return `M ${x1} ${y1} C ${mx} ${y1 + sag}, ${mx} ${y2 + sag}, ${x2} ${y2}`;
+    // Shorten endpoint slightly so arrowhead doesn't overlap the target box
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const len = Math.sqrt(dx*dx + dy*dy);
+    const shrink = len > 0 ? 8 / len : 0;
+    const ex = x2 - dx * shrink;
+    const ey = y2 - dy * shrink;
+    return `M ${x1} ${y1} C ${mx} ${y1 + sag}, ${mx} ${ey + sag}, ${ex} ${ey}`;
   };
 
   // ── SVG path helper — S-curve for vertical connections ─────────
   const makeVertSCurve = (x1, y1, x2, y2) => {
     const my = (y1 + y2) / 2;
-    return `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${y2}`;
+    // Shorten endpoint so arrowhead doesn't overlap
+    const dy = y2 - y1;
+    const ey = y2 - (dy > 0 ? 8 : -8);
+    return `M ${x1} ${y1} C ${x1} ${my}, ${x2} ${my}, ${x2} ${ey}`;
   };
 
   // ── Compute SVG lines from real DOM rects ──────────────────────
@@ -293,7 +303,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
         lines.push({
           key: 'cpu-tlb',
           path: makeHorizArc(cpu.right, cpu.cy, tlb.left, tlb.cy),
-          color: '#F59E0B', animated: true,
+          color: 'hsl(38, 95%, 50%)', animated: true,
         });
       }
 
@@ -302,7 +312,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
         lines.push({
           key: 'tlb-pt',
           path: makeVertSCurve(tlb.cx, tlb.bottom, pt.cx, pt.top),
-          color: '#EF4444', animated: true,
+          color: 'hsl(355, 85%, 52%)', animated: true,
         });
       }
 
@@ -311,7 +321,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
         lines.push({
           key: 'tlb-ram',
           path: makeHorizArc(tlb.right, tlb.cy, ram.left, ram.cy),
-          color: '#8B5CF6', animated: currentStep < maxSimSteps,
+          color: 'hsl(325, 85%, 55%)', animated: currentStep < maxSimSteps,
         });
       }
 
@@ -348,15 +358,17 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
             <React.Fragment key={l.key}>
               <marker
                 id={`tlb-arr-${l.key}`}
-                markerWidth="10" markerHeight="8"
-                refX="9" refY="4"
+                viewBox="0 0 12 10"
+                markerWidth="12" markerHeight="10"
+                refX="10" refY="5"
                 orient="auto"
-                markerUnits="strokeWidth"
+                markerUnits="userSpaceOnUse"
+                overflow="visible"
               >
-                <polygon points="0 0, 10 4, 0 8" fill={l.color} />
+                <polygon points="0 0, 12 5, 0 10" fill={l.color} />
               </marker>
-              <filter id={`tlb-glow-${l.key}`} x="-60%" y="-60%" width="220%" height="220%">
-                <feGaussianBlur stdDeviation="2.5" result="b" />
+              <filter id={`tlb-glow-${l.key}`} x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="3" result="b" />
                 <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
             </React.Fragment>
@@ -370,6 +382,7 @@ export default function TLB({ currentStep, setMaxSteps, onRestart }) {
             fill="none"
             stroke={l.color}
             strokeWidth="2.5"
+            strokeLinecap="round"
             className={l.animated ? 'tlb-svg-flow' : ''}
             markerEnd={`url(#tlb-arr-${l.key})`}
             filter={`url(#tlb-glow-${l.key})`}
